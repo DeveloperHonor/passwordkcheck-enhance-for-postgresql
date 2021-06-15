@@ -2,7 +2,7 @@
 <h3 id="habouthowtouse"><span>About how to use</span></h3>
 <ol>
 <li><p>You need to download two files in this repository,then copy to "src package"'s contrib directory from your download directory</p></li>
-<li><p>Switch to contrib directory and execute make command</p></li>
+<li><p>Switch to contrib directory and execute make and make install command</p></li>
 <li><p>You need to copy passwordcheck-enhance.so file to lib's install path of PostgreSQL as "/data/pg12.6/lib/postgresql" </p></li>
 <li><p>You need add shared_preload_libraries = 'passwordcheck-enhance' item to PGDATA/postgresql.auto.conf or PGDATA/postgresql.conf file</p></li>
 <li><p>Restart your PostgreSQL server.</p></li>
