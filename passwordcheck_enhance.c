@@ -1,14 +1,11 @@
 /*-------------------------------------------------------------------------
  *
- * passwordcheck.c
+ * passwordcheck_enchance.c
  *
- *
- * Copyright (c) 2009-2017, PostgreSQL Global Development Group
- *
- * Author: Laurenz Albe <laurenz.albe@wien.gv.at>
+ * Author: Sungsasong
  *
  * IDENTIFICATION
- *      contrib/passwordcheck/passwordcheck.c
+ *      contrib/passwordcheck_enhance/passwordcheck_enhance.c
  *
  *-------------------------------------------------------------------------
  */
@@ -33,26 +30,19 @@ PG_MODULE_MAGIC;
 
 /* passwords shorter than this will be rejected */
 #define MIN_PWD_LENGTH 8
+#define MIN_UPPER_LETTER  1
+#define MIN_LOWER_LETTER  1
+#define MIN_DIGIT_CHAR    1
+#define MIN_SPECIAL_CHAR  1
+
 
 extern void _PG_init(void);
 
-/*
- * check_password
- *
- * performs checks on an encrypted or unencrypted password
- * ereport's if not acceptable
- *
- * username: name of role being created or changed
- * password: new password (possibly already encrypted)
- * password_type: PASSWORD_TYPE_PLAINTEXT or PASSWORD_TYPE_MD5 (there
- *            could be other encryption schemes in future)
- * validuntil_time: password expiration time, as a timestamptz Datum
- * validuntil_null: true if password expiration time is NULL
- *
- * This sample implementation doesn't pay any attention to the password
- * expiration time, but you might wish to insist that it be non-null and
- * not too far in the future.
- */
+/**********************************************************************
+ *Function:passwordcheck_enhance                                      *
+ *Verifying the password at least need contains one upper letter,lower* 
+ *letter,digit and specital character                                 *
+ *********************************************************************/
 
 #if PG_VERSION_NUM >= 100000
     static void
@@ -88,15 +78,11 @@ extern void _PG_init(void);
             int            i;
             // bool        pwd_has_letter,
             //             pwd_has_nonletter;
-            int         PWD_UPPER_LETTER_COUNT  = 0;
-            int         PWD_LOWER_LETTER_COUNT  = 0;
-            int         PWD_SPECIAL_CHAR_COUNT  = 0;
-            int         PWD_DIGIT_COUNT         = 0;
-            int         MIN_UPPER_LETTER        = 1;
-            int         MIN_LOWER_LETTER        = 1;
-            int         MIN_DIGIT_CHAR          = 1;
-            int         MIN_SPECIAL_CHAR        = 1;
-            int         PWD_CONTAINS_LETTER_COUNT = 0;
+            int PWD_UPPER_LETTER_COUNT  = 0;
+            int PWD_LOWER_LETTER_COUNT  = 0;
+            int PWD_SPECIAL_CHAR_COUNT  = 0;
+            int PWD_DIGIT_COUNT         = 0;
+            int PWD_CONTAINS_LETTER_COUNT = 0;
 
 
                 //如果满足至少8位密码的条件，那么判断密码中是否包含至少一个大小写字母和特殊字符
@@ -168,36 +154,6 @@ extern void _PG_init(void);
                         (errcode(ERRCODE_INVALID_PARAMETER_VALUE),
                      errmsg("密码不能与用户名同名")));
             }
-
-            /* check if the password contains both letters and non-letters */
-            /* 由于上面已对字母做了检测，因此这里不需要验证*/
-            // pwd_has_letter = false;
-            // pwd_has_nonletter = false;
-            // for (i = 0; i < pwdlen; i++)
-            // {
-            //     /*
-            //      * isalpha() does not work for multibyte encodings but let's
-            //      * consider non-ASCII characters non-letters
-            //      */
-            //     if (isalpha((unsigned char) password[i]))
-            //         pwd_has_letter = true;
-            //     else
-            //         pwd_has_nonletter = true;
-            // }
-            // if (!pwd_has_letter || !pwd_has_nonletter)
-            //     ereport(ERROR,
-            //             (errcode(ERRCODE_INVALID_PARAMETER_VALUE),
-            //        errmsg()));
-
-    // #ifdef USE_CRACKLIB
-    //         /* call cracklib to check password */
-    //         if (FascistCheck(password, CRACKLIB_DICTPATH))
-    //         {
-    //             ereport(ERROR,
-    //                     (errcode(ERRCODE_INVALID_PARAMETER_VALUE),
-    //                      errmsg("password is easily cracked")));
-    //         }
-    // #endif
         }
 
         /* all checks passed, password is ok */
@@ -212,20 +168,15 @@ extern void _PG_init(void);
     {
         int            namelen = strlen(username);
         int            pwdlen = strlen(password);
-        char        encrypted[MD5_PASSWD_LEN + 1];
+        char           encrypted[MD5_PASSWD_LEN + 1];
         int            i;
         bool        pwd_has_letter,
                     pwd_has_nonletter;
-            int         PWD_UPPER_LETTER_COUNT  = 0;
-            int         PWD_LOWER_LETTER_COUNT  = 0;
-            int         PWD_SPECIAL_CHAR_COUNT  = 0;
-            int         PWD_DIGIT_COUNT         = 0;
-            int         MIN_UPPER_LETTER        = 1;
-            int         MIN_LOWER_LETTER        = 1;
-            int         MIN_DIGIT_CHAR          = 1;
-            int         MIN_SPECIAL_CHAR        = 1;
-            int         PWD_CONTAINS_LETTER_COUNT = 0;
-
+        int PWD_UPPER_LETTER_COUNT  = 0;
+        int PWD_LOWER_LETTER_COUNT  = 0;
+        int PWD_SPECIAL_CHAR_COUNT  = 0;
+        int PWD_DIGIT_COUNT         = 0;
+        int PWD_CONTAINS_LETTER_COUNT = 0;
 
         switch (password_type)
         {
@@ -328,35 +279,6 @@ extern void _PG_init(void);
                      errmsg("密码不能与用户名同名")));
             }
             
-
-                /* check if the password contains both letters and non-letters */
-                // pwd_has_letter = false;
-                // pwd_has_nonletter = false;
-                // for (i = 0; i < pwdlen; i++)
-                // {
-                //     /*
-                //      * isalpha() does not work for multibyte encodings but let's
-                //      * consider non-ASCII characters non-letters
-                //      */
-                //     if (isalpha((unsigned char) password[i]))
-                //         pwd_has_letter = true;
-                //     else
-                //         pwd_has_nonletter = true;
-                // }
-                // if (!pwd_has_letter || !pwd_has_nonletter)
-                //     ereport(ERROR,
-                //             (errcode(ERRCODE_INVALID_PARAMETER_VALUE),
-                //     errmsg("password must contain both letters and nonletters")));
-
-    // #ifdef USE_CRACKLIB
-    //             /* call cracklib to check password */
-    //             if (FascistCheck(password, CRACKLIB_DICTPATH))
-    //             {
-    //                 ereport(ERROR,
-    //                         (errcode(ERRCODE_INVALID_PARAMETER_VALUE),
-    //                          errmsg("password is easily cracked")));
-    //             }
-    // #endif
                 break;
 
             default:
